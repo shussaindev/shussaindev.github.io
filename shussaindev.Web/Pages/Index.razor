@@ -1,0 +1,39 @@
+﻿@page "/"
+@using Octokit
+@using System.Linq
+
+<PageTitle>shussain.dev</PageTitle>
+
+@user?.Login
+
+@if (repos is not null)
+{
+    @foreach (var repo in repos)
+    {
+        @if (repo.HasPages)
+        {
+            <p>@repo.Name <a href="@repo.HtmlUrl">Repo</a> <a href="@($"https://{repo.Name}.shussain.dev")">Page</a></p>
+        }
+        else
+        {
+            <p>@repo.Name <a href="@repo.HtmlUrl">Repo</a></p>
+        }
+    }
+}
+
+@code {
+
+    User? user;
+    string login = "shussaindev";
+    List<Repository>? repos;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var client = new GitHubClient(new ProductHeaderValue(login));
+        user = await client.User.Get(login);
+        repos = (await client.Repository.GetAllForUser(login))
+            .Where(r => r.Name != "shussaindev.github.io")
+            .ToList();
+    }
+
+}
